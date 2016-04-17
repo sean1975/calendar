@@ -1,4 +1,42 @@
 body {
     font-family: Verdana, Helvetica, sans-serif;
-    background-color: #FFFFCC;
+}
+
+table {
+    border-spacing: 0;
+}
+
+tr.even_row_1 {
+    background-color: #f8f8f8;
+}
+
+th {
+    border-bottom: 1px solid #808080;
+    color: #000;
+    font-weight: bold;
+    padding-bottom: 3px;
+    padding-right: 8px;
+    padding-top: 12px;
+}
+
+td {
+    border-bottom: 1px solid #cbcbcb;
+    padding: 8px 8px 7px;
+    text-align: left;
+}
+
+td.index {
+    text-align: right;
+}
+
+td.number {
+    max-width: 200px;
+    text-align: right;
+    width: 100px;
+}
+
+td.date {
+    max-width: 300px;
+    text-align: right;
+    width: 150px;
 }

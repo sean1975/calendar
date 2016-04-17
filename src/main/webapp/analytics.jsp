@@ -30,15 +30,18 @@
 	<div id='main'>
 		<table>
 			<tr>
+			    <th></th>
 				<th>Summary</th>
 				<th>Occurrences</th>
 				<th>Last Date</th>
 			</tr>
-			<c:forEach items="${requestScope['events']}" var="event">
-				<tr>
-					<td><c:out value="${event.summary}" /></td>
-					<td><c:out value="${event.occurrence}" /></td>
-					<td><fmt:formatDate value="${event.startTime}" type="date"
+			<c:forEach items="${requestScope['events']}" var="event" varStatus="status">
+				<c:set var="even_row" value="${status.count % 2}" />
+			    <tr class="even_row_${even_row}">
+				    <td class="index"><c:out value="${status.count}." /></td>
+					<td class="text"><c:out value="${event.summary}" /></td>
+					<td class="number"><c:out value="${event.occurrence}" /></td>
+					<td class="date"><fmt:formatDate value="${event.startTime}" type="date"
 							timeZone="${calendarTimeZone}" /></td>
 				</tr>
 			</c:forEach>
