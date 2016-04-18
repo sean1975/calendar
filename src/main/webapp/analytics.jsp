@@ -11,7 +11,19 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Sean's Calendar Analytics</title>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+<script>
+    $.datepicker.setDefaults({
+    	dateFormat: "yy-mm-dd"
+    });
+    $(function() {
+        $( "#startdate" ).datepicker();
+        $( "#enddate" ).datepicker();
+    });
+</script>
 </head>
 
 <!-- TODO: CSS, pie/bar charts -->
@@ -21,12 +33,25 @@
 		value="${requestScope['calendar'].summary}" />
 	<c:set var="calendarTimeZone"
 		value="${requestScope['calendar'].timeZone}" />
+    <fmt:formatDate var="startDate" pattern="yyyy-MM-dd" timeZone="${calendarTimeZone}"
+        value="${requestScope['calendar'].start}" />
+    <fmt:formatDate var="endDate" pattern="yyyy-MM-dd" timeZone="${calendarTimeZone}"
+        value="${requestScope['calendar'].end}" />
 
 	<div id="title">
 		<span>Calendar: <c:out value="${calendarSummary}" /></span> <br>
 		<span>Time Zone: <c:out value="${calendarTimeZone}" /></span>
 	</div>
 
+    <div id='menu'>
+        <form action="analytics">
+            <label for="start_date">Start Date:</label>
+            <input type="text" id="startdate" name="start" value="${startDate}">
+            <label for="end_date">End Date:</label>
+            <input type="text" id="enddate" name="end" value="${endDate}">
+            <input type="submit" value="Set">
+        </form>
+    </div>
 	<div id='main'>
 		<table>
 			<tr>

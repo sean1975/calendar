@@ -37,7 +37,6 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
     private static final String PARA_NAME_SUMMARY = "summary";
     private static final String PARA_NAME_START = "start";
     private static final String PARA_NAME_END = "end";
-    private static final String PARA_VALUE_NOW = "now";
     private static final String ATTR_NAME_EVENTS = "events";
     private static final String ATTR_NAME_CALENDAR = "calendar";
     private Set<String> summarySet;
@@ -60,9 +59,6 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
         Calendar service = new Calendar.Builder(Utils.getDefaultTransport(), Utils.getDefaultJsonFactory(), credential)
                 .setApplicationName(APPLICATION_NAME).build();
         com.google.api.services.calendar.model.Calendar calendar = service.calendars().get(CALENDAR_NAME).execute();
-        com.sean.calendar.Calendar calendarObject = new com.sean.calendar.Calendar(calendar.getSummary(),
-                calendar.getTimeZone());
-        req.setAttribute(ATTR_NAME_CALENDAR, calendarObject);
         timeZone = TimeZone.getTimeZone(calendar.getTimeZone());
         
         // Get parameters from HTTP request
@@ -70,6 +66,11 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
         getParameterStart(req);
         getParameterEnd(req);
 
+        // Set attribute calendar
+        com.sean.calendar.Calendar calendarObject = new com.sean.calendar.Calendar(calendar.getSummary(),
+                calendar.getTimeZone(), startDate, endDate);
+        req.setAttribute(ATTR_NAME_CALENDAR, calendarObject);
+        
         // Iterate over the events in the specified calendar
         Map<String, List<Event>> eventMap = new HashMap<String, List<Event>>();
         String pageToken = null;
@@ -129,13 +130,15 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
     private void getParameterEnd(HttpServletRequest req) {
         String end = req.getParameter(PARA_NAME_END);
         if (end == null) {
-            return;
-        }
-        if (end.compareTo(PARA_VALUE_NOW) == 0) {
             endDate = new Date();
         } else {
             try {
                 endDate = new SimpleDateFormat("yyyy-MM-dd").parse(end);
+                java.util.Calendar cal = java.util.Calendar.getInstance(timeZone);
+                cal.setTime(endDate);
+                cal.add(java.util.Calendar.DATE, +1);
+                cal.add(java.util.Calendar.SECOND, -1);
+                endDate = cal.getTime();
             } catch (ParseException e) {
                 getServletContext().log("Parameter " + PARA_NAME_END + "[" + end + "] is invalid.");
             }
@@ -145,10 +148,11 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
     private void getParameterStart(HttpServletRequest req) {
         String start = req.getParameter(PARA_NAME_START);
         if (start == null) {
-            return;
-        }
-        if (start.compareTo(PARA_VALUE_NOW) == 0) {
             startDate = new Date();
+            java.util.Calendar cal = java.util.Calendar.getInstance(timeZone);
+            cal.setTime(startDate);
+            cal.add(java.util.Calendar.MONTH, -6);
+            startDate = cal.getTime();
         } else {
             try {
                 startDate = new SimpleDateFormat("yyyy-MM-dd").parse(start);
