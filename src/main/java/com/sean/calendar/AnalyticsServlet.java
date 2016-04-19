@@ -72,6 +72,7 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
         req.setAttribute(ATTR_NAME_CALENDAR, calendarObject);
         
         // Iterate over the events in the specified calendar
+        Integer totalOccurrence = 0;
         Map<String, List<Event>> eventMap = new HashMap<String, List<Event>>();
         String pageToken = null;
         do {
@@ -99,6 +100,7 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
                 }
                 eventList.add(event);
                 eventMap.put(eventSummary, eventList);
+                totalOccurrence++;
             }
             pageToken = events.getNextPageToken();
         } while (pageToken != null);
@@ -107,6 +109,7 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
         ArrayList<com.sean.calendar.Event> eventList = new ArrayList<com.sean.calendar.Event>();
         for (Map.Entry<String, List<Event>> eventEntry : eventMap.entrySet()) {
             Integer occurrence = eventEntry.getValue().size();
+            Float occurrencePercentage = occurrence / new Float(totalOccurrence);
             // The key of map container is upper case, so use the last event
             // summary instead
             Event lastEvent = eventEntry.getValue().get(occurrence - 1);
@@ -116,7 +119,8 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
             if (startTime == null) {
                 startTime = lastEvent.getStart().getDate();
             }
-            com.sean.calendar.Event event = new com.sean.calendar.Event(summary, occurrence, startTime);
+            com.sean.calendar.Event event = new com.sean.calendar.Event(summary, occurrence, occurrencePercentage,
+                    startTime);
             eventList.add(event);
         }
         Collections.sort(eventList);

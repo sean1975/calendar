@@ -14,7 +14,7 @@ table {
     border-spacing: 0;
 }
 
-tr.even_row_1 {
+tr.odd_row_1 {
     background-color: #f8f8f8;
 }
 
@@ -27,23 +27,23 @@ th {
     padding-top: 12px;
 }
 
-td {
+th, td {
     border-bottom: 1px solid #cbcbcb;
     padding: 8px 8px 7px;
     text-align: left;
 }
 
-td.index {
+th.index, td.index {
     text-align: right;
 }
 
-td.number {
+th.number, td.number {
     max-width: 200px;
     text-align: right;
     width: 100px;
 }
 
-td.date {
+th.date, td.date {
     max-width: 300px;
     text-align: right;
     width: 150px;

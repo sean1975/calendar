@@ -55,17 +55,19 @@
 	<div id='main'>
 		<table>
 			<tr>
-			    <th></th>
-				<th>Summary</th>
-				<th>Occurrences</th>
-				<th>Last Date</th>
+			    <th class="index"></th>
+				<th class="text">Summary</th>
+				<th class="number">Occurrences</th>
+				<th class="number">%&nbsp;Occurrences</th>
+				<th class="date">Last Date</th>
 			</tr>
 			<c:forEach items="${requestScope['events']}" var="event" varStatus="status">
-				<c:set var="even_row" value="${status.count % 2}" />
-			    <tr class="even_row_${even_row}">
+				<c:set var="odd_row" value="${status.count % 2}" />
+			    <tr class="odd_row_${odd_row}">
 				    <td class="index"><c:out value="${status.count}." /></td>
 					<td class="text"><c:out value="${event.summary}" /></td>
 					<td class="number"><c:out value="${event.occurrence}" /></td>
+					<td class="number"><fmt:formatNumber value="${event.occurrencePercentage}" type="percent" maxFractionDigits="2" minFractionDigits="2" /></td>
 					<td class="date"><fmt:formatDate value="${event.startTime}" type="date"
 							timeZone="${calendarTimeZone}" /></td>
 				</tr>
