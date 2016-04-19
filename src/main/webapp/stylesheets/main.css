@@ -6,6 +6,11 @@ input#startdate, input#enddate {
     width: 80px;
 }
 
+div#piechart {
+    width: 600px;
+    height: 250px;
+}
+
 div#main {
     padding-top: 12px;
 }
