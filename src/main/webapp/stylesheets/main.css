@@ -1,5 +1,13 @@
 body {
-    font-family: Verdana, Helvetica, sans-serif;
+    font-family: arial, sans-serif;
+}
+
+input#startdate, input#enddate {
+    width: 80px;
+}
+
+div#main {
+    padding-top: 12px;
 }
 
 table {
