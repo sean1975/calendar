@@ -2,17 +2,49 @@ body {
     font-family: arial, sans-serif;
 }
 
-input#startdate, input#enddate {
+.title {
+    margin: 0;
+    width: 100%;
+}
+
+.dateformitem {
+    width: 100%;
+}
+
+.datelabel {
+    display: inline-block;
+    min-width: 80px;
+}
+
+.dateinput {
     width: 80px;
 }
 
-div#piechart {
-    width: 600px;
-    height: 250px;
+.main {
+    width: 100%;
+    margin: 0;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-flow: row-reverse wrap;
+    flex-flow: row-reverse wrap;
 }
 
-div#main {
-    padding-top: 12px;
+.chart {
+    width: 100%;
+    height: auto;
+}
+
+.statistics {
+    width: 100%;
+    height: auto;
+}
+
+.long_th {
+    display: none;
+}
+
+.short_th {
+    display: inline;
 }
 
 table {
@@ -36,6 +68,7 @@ th, td {
     border-bottom: 1px solid #cbcbcb;
     padding: 8px 8px 7px;
     text-align: left;
+    overflow: hidden;
 }
 
 th.index, td.index {
@@ -45,11 +78,57 @@ th.index, td.index {
 th.number, td.number {
     max-width: 200px;
     text-align: right;
-    width: 100px;
 }
 
 th.date, td.date {
     max-width: 300px;
     text-align: right;
-    width: 150px;
+}
+
+/* iPhone 6s */
+@media only screen and (min-width: 375px) {
+    .dateformitem {
+        display: inline;
+        margin-right: 20px;
+    }
+    .datelabel {
+        display: inline;
+        min-width: 60px;
+    }
+}
+
+/* iPad in landscape mode and PC */
+@media only screen and (min-width: 1024px) {
+    .chart {
+        width: 40%;
+        max-height: 500px;
+    }
+
+    .statistics {
+        width: 60%;
+    }
+
+    .long_th {
+        display: inline;
+    }
+
+    .short_th {
+        display: none;
+    }
+    
+    th, td {
+        width: 45%;
+    }
+    
+    th.index, td.index {
+        width: 5%;
+    }
+
+    th.number, td.number {
+        width: 15%;
+    }
+
+    th.date, td.date {
+        width: 20%;
+    }
 }

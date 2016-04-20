@@ -10,6 +10,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta content='width=device-width, initial-scale=1' name='viewport'/>
 <title>Sean's Calendar Analytics</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
@@ -61,26 +62,30 @@
     <fmt:formatDate var="endDate" pattern="yyyy-MM-dd" timeZone="${calendarTimeZone}"
         value="${requestScope['calendar'].end}" />
 
-	<div id="title">
+	<div class="title">
 		<span>Calendar: <c:out value="${calendarSummary}" /></span> <br>
 		<span>Time Zone: <c:out value="${calendarTimeZone}" /></span>
-        <form id="dateform" action="analytics">
-            <label for="start_date">Start Date:</label>
-            <input type="text" id="startdate" name="start" value="${startDate}" onchange="dateChanged(this.value);">
-            <label for="end_date">End Date:</label>
-            <input type="text" id="enddate" name="end" value="${endDate}" onchange="dateChanged(this.value);">
+        <form id="dateform" class="dateform" action="analytics">
+            <div class="dateformitem">
+            <label class="datelabel" for="start_date">Start Date:</label>
+            <input class="dateinput" type="text" id="startdate" name="start" value="${startDate}" onchange="dateChanged(this.value);">
+            </div>
+            <div class="dateformitem">
+            <label class="datelabel" for="end_date">End Date:</label>
+            <input class="dateinput" type="text" id="enddate" name="end" value="${endDate}" onchange="dateChanged(this.value);">
+            </div>
         </form>
     </div>
 
-	<div id='main'>
-        <div id='piechart'></div>
-        <div id='statistics'>
+	<div class="main">
+        <div class="chart" id="piechart"></div>
+        <div class="statistics">
 		<table>
 			<tr>
 			    <th class="index"></th>
 				<th class="text">Summary</th>
-				<th class="number">Occurrences</th>
-				<th class="number">%&nbsp;Occurrences</th>
+				<th class="number"><div class="long_th">Occurrences</div><div class="short_th">&nbsp;#</div></th>
+				<th class="number"><div class="long_th">Occurrence %</div><div class="short_th">&nbsp;%</div></th>
 				<th class="date">Last Date</th>
 			</tr>
 			<c:forEach items="${requestScope['events']}" var="event" varStatus="status">
@@ -97,6 +102,7 @@
 		</table>
 		</div>
 	</div>
+
 	<%-- function to submit the form when the date in #startdate or #enddate has changed --%>
     <script type="text/javascript">
         function dateChanged(val) {
