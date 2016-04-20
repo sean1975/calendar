@@ -72,16 +72,18 @@ th, td {
 }
 
 th.index, td.index {
+    padding-right: 0;
+    padding-left: 0;
     text-align: right;
 }
 
 th.number, td.number {
-    max-width: 200px;
+    max-width: 150px;
     text-align: right;
 }
 
 th.date, td.date {
-    max-width: 300px;
+    max-width: 150px;
     text-align: right;
 }
 
@@ -97,8 +99,8 @@ th.date, td.date {
     }
 }
 
-/* iPad in landscape mode and PC */
-@media only screen and (min-width: 1024px) {
+/* Small tablets, such as Google Nexus 7 */
+@media only screen and (min-width: 800px) {
     .chart {
         width: 40%;
         max-height: 500px;
@@ -108,14 +110,6 @@ th.date, td.date {
         width: 60%;
     }
 
-    .long_th {
-        display: inline;
-    }
-
-    .short_th {
-        display: none;
-    }
-    
     th, td {
         width: 45%;
     }
@@ -129,6 +123,57 @@ th.date, td.date {
     }
 
     th.date, td.date {
-        width: 20%;
+        width: 15%;
+    }
+}
+
+/* iPad mini/Air in landscape mode and net-PC */
+@media only screen and (min-width: 1024px) {
+    .long_th {
+        display: inline;
+    }
+
+    .short_th {
+        display: none;
+    }
+    
+    .chart {
+        width: 45%;
+        max-height: 550px;
+    }
+
+    .statistics {
+        width: 55%;
+    }
+}
+
+/* iPad Pro in landscape mode and laptop */
+@media only screen and (min-width: 1280px) {
+    .chart {
+        width: 50%;
+        max-height: 600px;
+    }
+
+    .statistics {
+        width: 50%;
+    }
+}
+
+/* iMac 21" and desktop */
+@media only screen and (min-width: 1920px) {
+    .title {
+        width: 90%;
+        padding-left: 10%;
+    }
+    
+    .chart {
+        width: 40%;
+        padding-right: 10%;
+        max-height: 750px;
+    }
+
+    .statistics {
+        width: 40%;
+        padding-left: 10%;
     }
 }

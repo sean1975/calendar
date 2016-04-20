@@ -85,7 +85,7 @@
 			    <th class="index"></th>
 				<th class="text">Summary</th>
 				<th class="number"><div class="long_th">Occurrences</div><div class="short_th">&nbsp;#</div></th>
-				<th class="number"><div class="long_th">Occurrence %</div><div class="short_th">&nbsp;%</div></th>
+				<th class="number"><div>&nbsp;%</div></th>
 				<th class="date">Last Date</th>
 			</tr>
 			<c:forEach items="${requestScope['events']}" var="event" varStatus="status">
@@ -95,7 +95,7 @@
 					<td class="text"><c:out value="${event.summary}" /></td>
 					<td class="number"><c:out value="${event.occurrence}" /></td>
 					<td class="number"><fmt:formatNumber value="${event.occurrencePercentage}" type="percent" maxFractionDigits="1" minFractionDigits="1" /></td>
-					<td class="date"><fmt:formatDate value="${event.startTime}" type="date"
+					<td class="date"><fmt:formatDate value="${event.startTime}" type="date" dateStyle="short"
 							timeZone="${calendarTimeZone}" /></td>
 				</tr>
 			</c:forEach>
