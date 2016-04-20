@@ -64,12 +64,11 @@
 	<div id="title">
 		<span>Calendar: <c:out value="${calendarSummary}" /></span> <br>
 		<span>Time Zone: <c:out value="${calendarTimeZone}" /></span>
-        <form action="analytics">
+        <form id="dateform" action="analytics">
             <label for="start_date">Start Date:</label>
-            <input type="text" id="startdate" name="start" value="${startDate}">
+            <input type="text" id="startdate" name="start" value="${startDate}" onchange="dateChanged(this.value);">
             <label for="end_date">End Date:</label>
-            <input type="text" id="enddate" name="end" value="${endDate}">
-            <input type="submit" value="Set">
+            <input type="text" id="enddate" name="end" value="${endDate}" onchange="dateChanged(this.value);">
         </form>
     </div>
 
@@ -98,6 +97,12 @@
 		</table>
 		</div>
 	</div>
-
+	<%-- function to submit the form when the date in #startdate or #enddate has changed --%>
+    <script type="text/javascript">
+        function dateChanged(val) {
+        	console.log("Date changed to " + val);
+        	document.getElementById("dateform").submit();
+        }
+    </script>
 </body>
 </html>
