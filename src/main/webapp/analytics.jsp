@@ -12,20 +12,9 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta content='width=device-width, initial-scale=1' name='viewport'/>
 <title>Sean's Calendar Analytics</title>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
-<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
-<%-- pop-up menus for selecting start and end dates --%>
-<script>
-    $.datepicker.setDefaults({
-    	dateFormat: "yy-mm-dd"
-    });
-    $(function() {
-        $( "#startdate" ).datepicker();
-        $( "#enddate" ).datepicker();
-    });
-</script>
+<link type="text/css" rel="stylesheet" href="/stylesheets/analytics.css" />
+<%@ include file="title_script.jsp"%>
 <%-- piechart for visualize event occurrence proportion --%>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
@@ -53,30 +42,8 @@
 
 <body>
 
-	<c:set var="calendarSummary"
-		value="${requestScope['calendar'].summary}" />
-	<c:set var="calendarTimeZone"
-		value="${requestScope['calendar'].timeZone}" />
-    <fmt:formatDate var="startDate" pattern="yyyy-MM-dd" timeZone="${calendarTimeZone}"
-        value="${requestScope['calendar'].start}" />
-    <fmt:formatDate var="endDate" pattern="yyyy-MM-dd" timeZone="${calendarTimeZone}"
-        value="${requestScope['calendar'].end}" />
-
-	<div class="title">
-		<span>Calendar: <c:out value="${calendarSummary}" /></span> <br>
-		<span>Time Zone: <c:out value="${calendarTimeZone}" /></span>
-        <form id="dateform" class="dateform" action="analytics">
-            <div class="dateformitem">
-            <label class="datelabel" for="start_date">Start Date:</label>
-            <input class="dateinput" type="text" id="startdate" name="start" value="${startDate}" onchange="dateChanged(this.value);">
-            </div>
-            <div class="dateformitem">
-            <label class="datelabel" for="end_date">End Date:</label>
-            <input class="dateinput" type="text" id="enddate" name="end" value="${endDate}" onchange="dateChanged(this.value);">
-            </div>
-        </form>
-    </div>
-
+    <%@ include file="title_body.jsp" %>
+    
 	<div class="main">
         <div class="chart" id="piechart"></div>
         <div class="statistics">
@@ -103,12 +70,5 @@
 		</div>
 	</div>
 
-	<%-- function to submit the form when the date in #startdate or #enddate has changed --%>
-    <script type="text/javascript">
-        function dateChanged(val) {
-        	console.log("Date changed to " + val);
-        	document.getElementById("dateform").submit();
-        }
-    </script>
 </body>
 </html>

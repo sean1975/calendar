@@ -29,7 +29,7 @@ body {
     flex-flow: row-reverse wrap;
 }
 
-.chart {
+.chart, #columnchart {
     width: 100%;
     height: auto;
 }
@@ -85,95 +85,4 @@ th.number, td.number {
 th.date, td.date {
     max-width: 150px;
     text-align: right;
-}
-
-/* iPhone 6s */
-@media only screen and (min-width: 375px) {
-    .dateformitem {
-        display: inline;
-        margin-right: 20px;
-    }
-    .datelabel {
-        display: inline;
-        min-width: 60px;
-    }
-}
-
-/* Small tablets, such as Google Nexus 7 */
-@media only screen and (min-width: 800px) {
-    .chart {
-        width: 40%;
-        max-height: 500px;
-    }
-
-    .statistics {
-        width: 60%;
-    }
-
-    th, td {
-        width: 45%;
-    }
-    
-    th.index, td.index {
-        width: 5%;
-    }
-
-    th.number, td.number {
-        width: 15%;
-    }
-
-    th.date, td.date {
-        width: 15%;
-    }
-}
-
-/* iPad mini/Air in landscape mode and net-PC */
-@media only screen and (min-width: 1024px) {
-    .long_th {
-        display: inline;
-    }
-
-    .short_th {
-        display: none;
-    }
-    
-    .chart {
-        width: 45%;
-        max-height: 550px;
-    }
-
-    .statistics {
-        width: 55%;
-    }
-}
-
-/* iPad Pro in landscape mode and laptop */
-@media only screen and (min-width: 1280px) {
-    .chart {
-        width: 50%;
-        max-height: 600px;
-    }
-
-    .statistics {
-        width: 50%;
-    }
-}
-
-/* iMac 21" and desktop */
-@media only screen and (min-width: 1920px) {
-    .title {
-        width: 90%;
-        padding-left: 10%;
-    }
-    
-    .chart {
-        width: 40%;
-        padding-right: 10%;
-        max-height: 750px;
-    }
-
-    .statistics {
-        width: 40%;
-        padding-left: 10%;
-    }
 }
