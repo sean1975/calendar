@@ -56,9 +56,17 @@
 				<th class="date">Last Date</th>
 			</tr>
 			<c:forEach items="${requestScope['events']}" var="event" varStatus="status">
+			    <c:choose>
+			        <c:when test="${status.first}">
+			            <c:set var="summary" value="${event.summary}" />
+			        </c:when>
+			        <c:otherwise>
+			            <c:set var="summary" value="${summary},${event.summary}" />
+			        </c:otherwise>
+			    </c:choose>
 				<c:set var="odd_row" value="${status.count % 2}" />
 			    <tr class="odd_row_${odd_row}">
-				    <td class="index"><c:out value="${status.count}." /></td>
+				    <td class="index"><a href="analytics?start=${startDate}&end=${endDate}&summary=${summary}"><c:out value="${status.count}." /></a></td>
 					<td class="text"><c:out value="${event.summary}" /></td>
 					<td class="number"><c:out value="${event.occurrence}" /></td>
 					<td class="number"><fmt:formatNumber value="${event.occurrencePercentage}" type="percent" maxFractionDigits="1" minFractionDigits="1" /></td>

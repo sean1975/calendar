@@ -17,26 +17,37 @@
 <%-- column chart for visualize event occurrence proportion --%>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
+    <c:set var="distribution" value="${requestScope['distribution']}" />
+    <c:set var="eventList" value="${distribution.eventList}" />
+    <c:set var="intervals" value="${distribution.intervals}" />
+    <c:set var="distributionMap" value="${distribution.distributionMap}" />
     google.charts.load('current', {packages: ['corechart', 'bar']});
     google.charts.setOnLoadCallback(drawChart);
     function drawChart() {
     	var data = new google.visualization.DataTable();
-    	data.addColumn('string', 'Period');
-    	data.addColumn('number', 'Green Island');
-    	data.addColumn('number', 'Big Cat');
+    	data.addColumn('string', 'Interval');
+    	<c:forEach items="${eventList}" var="event" varStatus="status">
+    	data.addColumn('number', '<c:out value="${event}" />');
+    	</c:forEach>
         data.addRows([
-                      ["Dec", 5, 7],
-                      ["Jan", 6, 6],
-                      ["Feb", 10, 3],
-                      ["Mar", 12, 4]
+                      <c:forEach items="${intervals}" var="startDate" varStatus="status">
+                      ['<c:out value="${startDate}" />'<c:forEach items="${eventList}">, 0</c:forEach>]<c:if test="${not status.last}">,</c:if>
+                      </c:forEach>
                     ]);
+        <c:set var="col" value="0" />
+        <c:forEach items="${distributionMap}" var="entry">
+            <c:set var="col" value="${col + 1}" />
+            <c:forEach items="${entry.value }" var="occurrences" varStatus="occurrencesStatus">
+        data.setValue(<c:out value="${occurrencesStatus.index}" />, <c:out value="${col}" />, <c:out value="${occurrences}" />);
+            </c:forEach>
+        </c:forEach>
         var options = {
-                title: 'Event Distribution',
-                hAxis: {
-                  title: 'Date'
-                },
                 vAxis: {
-                  title: 'Occurrences'
+                  title: 'Occurrences',
+                  format: 'decimal',
+                  viewWindow: {
+                	  min: 0
+                  }
                 }
               };
         var chart = new google.visualization.ColumnChart(document.getElementById('columnchart'));
@@ -55,25 +66,24 @@
 		<table>
 			<tr>
 				<th>Summary</th>
-				<th>Dec</th>
-				<th>Jan</th>
-				<th>Feb</th>
-				<th>Mar</th>
+				<c:forEach items="${intervals}" var="startDate" varStatus="status">
+				<th><c:out value="${startDate}" /></th>
+				</c:forEach>
+				<th>Total</th>
 			</tr>
-			<tr class="odd_row_1">
-			    <td>Green Island</td>
-			    <td>5</td>
-			    <td>6</td>
-			    <td>10</td>
-			    <td>12</td>
-			</tr>
-			<tr class="odd_row_0">
-			    <td>Big Cat</td>
-			    <td>7</td>
-			    <td>6</td>
-			    <td>3</td>
-			    <td>4</td>
-			</tr>
+            <c:set var="col" value="0" />
+                <c:forEach items="${distributionMap}" var="entry">
+			        <c:set var="subtotal" value="0" />
+                    <c:set var="col" value="${col + 1}" />
+            <tr class="odd_row_<c:out value="${col % 2}" />">
+                <td><c:out value="${entry.key}" /></td>
+                    <c:forEach items="${entry.value }" var="occurrences">
+                <td><c:out value="${occurrences}" /></td>
+                    <c:set var="subtotal" value="${occurrences + subtotal}" />
+                    </c:forEach>
+                <td><c:out value="${subtotal}" /></td>
+            </tr>
+                </c:forEach>
 		</table>
 		</div>
 	</div>

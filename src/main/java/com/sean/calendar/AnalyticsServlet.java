@@ -16,6 +16,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,9 +35,11 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
     private static final String APPLICATION_NAME = "Sean's Calendar Analytics";
     private static final String CALENDAR_NAME = "primary";
     private static final String RESULT_PAGE = "/analytics.jsp";
+    private static final String DISTRIBUTION_PAGE = "/distribution.jsp";
     private static final String PARA_NAME_SUMMARY = "summary";
     private static final String PARA_NAME_START = "start";
     private static final String PARA_NAME_END = "end";
+    private static final String ATTR_NAME_DISTRIBUTION = "distribution";
     private static final String ATTR_NAME_EVENTS = "events";
     private static final String ATTR_NAME_CALENDAR = "calendar";
     private Set<String> summarySet;
@@ -71,25 +74,39 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
                 calendar.getTimeZone(), startDate, endDate);
         req.setAttribute(ATTR_NAME_CALENDAR, calendarObject);
         
+        if (summarySet != null && (summarySet.size() > 0)) {
+            Distribution distribution = getDistribution(service);
+            req.setAttribute(ATTR_NAME_DISTRIBUTION, distribution);
+
+            // Forward to the result page for displaying distribution list
+            RequestDispatcher rd = req.getRequestDispatcher(DISTRIBUTION_PAGE);
+            rd.forward(req, resp);
+        } else {            
+            ArrayList<com.sean.calendar.Event> eventList = getEventList(service);
+            req.setAttribute(ATTR_NAME_EVENTS, eventList);
+
+            // Forward to the result page for displaying event list
+            RequestDispatcher rd = req.getRequestDispatcher(RESULT_PAGE);
+            rd.forward(req, resp);
+        }
+    }
+
+    private Integer getEventMap(Calendar service, Map<String, List<Event>> eventMap, Set<String> summarySet)
+            throws IOException {
         // Iterate over the events in the specified calendar
         Integer totalOccurrence = 0;
-        Map<String, List<Event>> eventMap = new HashMap<String, List<Event>>();
         String pageToken = null;
         do {
             com.google.api.services.calendar.Calendar.Events.List eventsList = service.events().list(CALENDAR_NAME);
             eventsList.setSingleEvents(true).setOrderBy("startTime").setPageToken(pageToken);
-            if (startDate != null) {
-                eventsList.setTimeMin(new DateTime(startDate, timeZone));
-            }
-            if (endDate != null) {
-                eventsList.setTimeMax(new DateTime(endDate, timeZone));
-            }
+            eventsList.setTimeMin(new DateTime(startDate, timeZone));
+            eventsList.setTimeMax(new DateTime(endDate, timeZone));
             Events events = eventsList.execute();
             List<Event> items = events.getItems();
             for (Event event : items) {
                 // Use upper case of summary as the key for map container
                 String eventSummary = event.getSummary().toUpperCase();
-                if (summarySet != null && (!summarySet.contains(eventSummary))) {
+                if (summarySet != null && summarySet.contains(eventSummary) == false) {
                     continue;
                 }
                 List<Event> eventList = null;
@@ -104,6 +121,81 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
             }
             pageToken = events.getNextPageToken();
         } while (pageToken != null);
+        return totalOccurrence;
+    }
+    
+    class EventDateComparator implements Comparator<Event> {
+
+        @Override
+        public int compare(Event e1, Event e2) {
+            DateTime t1 = e1.getStart().getDateTime();
+            if (t1 == null)
+                t1 = e1.getStart().getDate();
+            DateTime t2 = e2.getStart().getDateTime();
+            if (t2 == null)
+                t2 = e2.getStart().getDate();
+            if (t1.getValue() < t2.getValue())
+                return -1;
+            else if (t1.getValue() == t2.getValue())
+                return 0;
+            return 1;
+        }
+        
+    }
+    
+    private Distribution getDistribution(Calendar service) throws IOException {
+        Map<String, List<Event>> eventMap = new HashMap<String, List<Event>>();
+        getEventMap(service, eventMap, summarySet);
+        // Put empty event list if the specific event is not found from startDate to endDate
+        for (String summary : summarySet) {
+            if (! eventMap.containsKey(summary)) {
+                eventMap.put(summary, new ArrayList<Event>());
+            }
+        } 
+
+        // Iterate all events to compute the occurrence distribution
+        Distribution distribution = new Distribution(startDate, endDate, timeZone);
+        List<Date> period = distribution.getPeriod();
+        for (Map.Entry<String, List<Event>> eventEntry : eventMap.entrySet()) {
+            List<Event> events = eventEntry.getValue();
+            Collections.sort(events, new EventDateComparator());
+            // The key of map container is upper case, so use the last event
+            // summary instead
+            Event lastEvent = events.get(events.size() - 1);
+            String event = lastEvent.getSummary();
+            List<Integer> occurrences = new ArrayList<Integer>(period.size()-1);
+            for (int index=0; index<period.size()-1; index++) {
+                occurrences.add(0);
+            }
+            // Events between left and right occur in the interval defined by breakpoint period.get(i-1) and period.get(i)
+            int i=1, right=0, left=right;
+            for (; i<period.size(); i++) {
+                for (; right<events.size(); right++) {
+                    DateTime startTime = events.get(right).getStart().getDateTime();
+                    if (startTime == null) {
+                        startTime = events.get(right).getStart().getDate();
+                    }
+                    if (startTime.getValue() >= period.get(i).getTime()) {
+                        occurrences.set(i-1, right-left);
+                        left = right;
+                        break;
+                    }
+                }
+                // Add the remaining events
+                if (right != left) {
+                    occurrences.set(i-1, right-left);
+                    break;
+                }
+            }
+            distribution.addDistribution(event,  occurrences);
+        }
+        return distribution;
+    }
+
+    private ArrayList<com.sean.calendar.Event> getEventList(Calendar service)
+            throws IOException {
+        Map<String, List<Event>> eventMap = new HashMap<String, List<Event>>();
+        Integer totalOccurrence = getEventMap(service, eventMap, null);
 
         // Sort events by occurrences
         ArrayList<com.sean.calendar.Event> eventList = new ArrayList<com.sean.calendar.Event>();
@@ -124,51 +216,59 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
             eventList.add(event);
         }
         Collections.sort(eventList);
-        req.setAttribute(ATTR_NAME_EVENTS, eventList);
-
-        // Forward to the result page for displaying event list
-        RequestDispatcher rd = req.getRequestDispatcher(RESULT_PAGE);
-        rd.forward(req, resp);
+        return eventList;
     }
 
     private void getParameterEnd(HttpServletRequest req) {
         String end = req.getParameter(PARA_NAME_END);
-        if (end == null) {
-            endDate = new Date();
-        } else {
-            try {
-                endDate = new SimpleDateFormat("yyyy-MM-dd").parse(end);
-                java.util.Calendar cal = java.util.Calendar.getInstance(timeZone);
-                cal.setTime(endDate);
-                cal.add(java.util.Calendar.DATE, +1);
-                cal.add(java.util.Calendar.SECOND, -1);
-                endDate = cal.getTime();
-            } catch (ParseException e) {
-                getServletContext().log("Parameter " + PARA_NAME_END + "[" + end + "] is invalid.");
-            }
+        try {
+            endDate = new SimpleDateFormat("yyyy-MM-dd").parse(end);
+        } catch (ParseException e) {
+            getServletContext().log("Parameter " + PARA_NAME_END + "[" + end + "] is invalid.");
+        } catch (Exception e) {
+            // ignore
         }
+        if (endDate == null) {
+            endDate = new Date();
+        }
+        java.util.Calendar cal = java.util.Calendar.getInstance(timeZone);
+        cal.setTime(endDate);
+        cal.add(java.util.Calendar.DATE, +1);
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        cal.set(java.util.Calendar.MINUTE, 0);
+        cal.set(java.util.Calendar.SECOND, 0);
+        endDate = cal.getTime();
     }
 
     private void getParameterStart(HttpServletRequest req) {
         String start = req.getParameter(PARA_NAME_START);
-        if (start == null) {
-            startDate = new Date();
+        try {
+            startDate = new SimpleDateFormat("yyyy-MM-dd").parse(start);
             java.util.Calendar cal = java.util.Calendar.getInstance(timeZone);
             cal.setTime(startDate);
-            cal.add(java.util.Calendar.MONTH, -6);
+            cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+            cal.set(java.util.Calendar.MINUTE, 0);
+            cal.set(java.util.Calendar.SECOND, 0);
             startDate = cal.getTime();
-        } else {
-            try {
-                startDate = new SimpleDateFormat("yyyy-MM-dd").parse(start);
-            } catch (ParseException e) {
-                getServletContext().log("Parameter " + PARA_NAME_START + "[" + start + "] is invalid.");
-            }
+        } catch (ParseException pe) {
+            getServletContext().log("Parameter " + PARA_NAME_START + "[" + start + "] is invalid.");
+        } catch (Exception e) {
+            // ignore
+        }
+        if (startDate == null) {
+            java.util.Calendar cal = java.util.Calendar.getInstance(timeZone);
+            cal.add(java.util.Calendar.MONTH, -6);
+            cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+            cal.set(java.util.Calendar.MINUTE, 0);
+            cal.set(java.util.Calendar.SECOND, 0);
+            startDate = cal.getTime();
         }
     }
 
     private void getParameterSummary(HttpServletRequest req) {
         String summary = req.getParameter(PARA_NAME_SUMMARY);
         if (summary == null) {
+            summarySet = null;
             return;
         }
         getServletContext().log("Parameter [" + PARA_NAME_SUMMARY + "]: " + summary);
