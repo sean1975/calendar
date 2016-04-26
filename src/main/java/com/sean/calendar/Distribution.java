@@ -24,12 +24,12 @@ public class Distribution {
     
     // Get formatted interval strings. Maybe this should be done in distribution.jsp by JSP/JSTL
     public List<String> getIntervals() {
+        // Default time zone will be used by SimpleDateFormat::initializeCalendar
+        TimeZone.setDefault(this.timeZone);
         ArrayList<String> intervals = new ArrayList<String>();
         for (int i=0; i<period.size()-1; i++) {
             long duration = (period.get(i+1).getTime() - period.get(i).getTime());
             long duration_in_day = duration / MILLISECONDS_IN_A_DAY;
-            java.util.Calendar cal = java.util.Calendar.getInstance(timeZone);
-            cal.setTime(period.get(i));
             String interval;
             DateFormat df;
             if (duration_in_day > THREE_WEEKS) {
@@ -39,7 +39,10 @@ public class Distribution {
                 df = new SimpleDateFormat("MMM dd");
                 interval = df.format(period.get(i));
                 interval += " ~ ";
-                interval += df.format(period.get(i+1));
+                java.util.Calendar cal = java.util.Calendar.getInstance(timeZone);
+                cal.setTime(period.get(i+1));
+                cal.add(java.util.Calendar.DATE, -1);
+                interval += df.format(cal.getTime());
             } else {
                 df = new SimpleDateFormat("MMM dd");
                 interval = df.format(period.get(i));
@@ -77,8 +80,14 @@ public class Distribution {
         startCal.setTime(start);
         java.util.Calendar endCal = java.util.Calendar.getInstance(this.timeZone);
         endCal.setTime(end);
+        // Round up the end date to 00:00:00 on the following date
+        endCal.add(java.util.Calendar.DATE, 1);
+        endCal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        endCal.set(java.util.Calendar.MINUTE, 0);
+        endCal.set(java.util.Calendar.SECOND, 0);
         long duration = endCal.getTimeInMillis() - startCal.getTimeInMillis();
-        long duration_in_day = duration / MILLISECONDS_IN_A_DAY;
+        
+        long duration_in_day = (duration + 1000L) / MILLISECONDS_IN_A_DAY;
         while (endCal.after(startCal)) {
             period.add(startCal.getTime());
             if (duration_in_day > EIGHT_WEEKS) {

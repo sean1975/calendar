@@ -159,10 +159,13 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
         for (Map.Entry<String, List<Event>> eventEntry : eventMap.entrySet()) {
             List<Event> events = eventEntry.getValue();
             Collections.sort(events, new EventDateComparator());
-            // The key of map container is upper case, so use the last event
-            // summary instead
-            Event lastEvent = events.get(events.size() - 1);
-            String event = lastEvent.getSummary();
+            String event = eventEntry.getKey();
+            if (events.size() > 0) {
+                // The key of map container is upper case, so use the last event
+                // summary instead
+                Event lastEvent = events.get(events.size() - 1);
+                event = lastEvent.getSummary();
+            }
             List<Integer> occurrences = new ArrayList<Integer>(period.size()-1);
             for (int index=0; index<period.size()-1; index++) {
                 occurrences.add(0);
