@@ -11,6 +11,17 @@
 	<span>Calendar: <c:out value="${calendarSummary}" /></span> <br>
 	<span>Time Zone: <c:out value="${calendarTimeZone}" /></span>
     <form id="dateform" class="dateform" action="analytics">
+        <c:forEach items="${requestScope['distribution'].eventList}" var="event" varStatus="eventListStatus">
+            <c:choose>
+                <c:when test="${eventListStatus.first}">
+                    <c:set var="eventSummary" value="${event}" />
+                </c:when>
+                <c:otherwise>
+                    <c:set var="eventSummary" value="${eventSummary},${event}" />
+                </c:otherwise>
+            </c:choose>
+        </c:forEach>
+        <input type="hidden" name="summary" value="${eventSummary}">
         <div class="dateformitem">
             <label class="datelabel" for="start_date">Start Date:</label>
             <input class="dateinput" type="text" id="startdate" name="start" value="${startDate}" onchange="dateChanged(this.value);">

@@ -269,7 +269,7 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
 
     private void getParameterSummary(HttpServletRequest req) {
         String summary = req.getParameter(PARA_NAME_SUMMARY);
-        if (summary == null) {
+        if (summary == null || summary.length() == 0) {
             summarySet = null;
             return;
         }
