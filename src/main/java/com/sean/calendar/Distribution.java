@@ -16,7 +16,7 @@ public class Distribution {
     
     private static final long MILLISECONDS_IN_A_DAY = 1000 * 60 * 60 * 24;
     private static final long EIGHT_WEEKS = 8 * 7;
-    private static final long THREE_WEEKS = 3 * 7;
+    private static final long TWO_WEEKS = 2 * 7;
 
     public List<Date> getPeriod() {
         return period;
@@ -32,7 +32,7 @@ public class Distribution {
             long duration_in_day = duration / MILLISECONDS_IN_A_DAY;
             String interval;
             DateFormat df;
-            if (duration_in_day > THREE_WEEKS) {
+            if (duration_in_day > TWO_WEEKS) {
                 df = new SimpleDateFormat("MMM");
                 interval = df.format(period.get(i));
             } else if (duration_in_day > 1) {
@@ -94,7 +94,7 @@ public class Distribution {
                 // For duration longer than 8 weeks, align the intervals with calendar months
                 startCal.add(java.util.Calendar.MONTH, +1);
                 startCal.set(java.util.Calendar.DAY_OF_MONTH, 1);
-            } else if (duration_in_day > THREE_WEEKS) {
+            } else if (duration_in_day > TWO_WEEKS) {
                 startCal.add(java.util.Calendar.DATE, +7);
             } else {
                 startCal.add(java.util.Calendar.DATE, +1);
