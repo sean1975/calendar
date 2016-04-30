@@ -39,6 +39,7 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
     private static final String PARA_NAME_SUMMARY = "summary";
     private static final String PARA_NAME_START = "start";
     private static final String PARA_NAME_END = "end";
+    private static final String PARA_NAME_EXCLUDE = "exclude";
     private static final String ATTR_NAME_DISTRIBUTION = "distribution";
     private static final String ATTR_NAME_EVENTS = "events";
     private static final String ATTR_NAME_CALENDAR = "calendar";
@@ -46,6 +47,7 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
     private TimeZone timeZone;
     private Date startDate;
     private Date endDate;
+    private Set<String> excludeSet;
 
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -68,6 +70,7 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
         getParameterSummary(req);
         getParameterStart(req);
         getParameterEnd(req);
+        getParameterExclude(req);
 
         // Set attribute calendar
         com.sean.calendar.Calendar calendarObject = new com.sean.calendar.Calendar(calendar.getSummary(),
@@ -106,6 +109,9 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
             for (Event event : items) {
                 // Use upper case of summary as the key for map container
                 String eventSummary = event.getSummary().toUpperCase();
+                if (excludeSet != null && excludeSet.contains(eventSummary) == true) {
+                    continue;
+                }
                 if (summarySet != null && summarySet.contains(eventSummary) == false) {
                     continue;
                 }
@@ -222,6 +228,22 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
         return eventList;
     }
 
+    private void getParameterExclude(HttpServletRequest req) {
+        String exclude = req.getParameter(PARA_NAME_EXCLUDE);
+        if (exclude == null || exclude.length() == 0) {
+            excludeSet = null;
+            return;
+        }
+        getServletContext().log("Parameter [" + PARA_NAME_EXCLUDE + "]: " + exclude);
+        String excludeArray[] = exclude.split(",");
+        if (excludeArray.length > 0) {
+            excludeSet = new HashSet<String>();
+            for (int i = 0; i < excludeArray.length; i++) {
+                excludeSet.add(excludeArray[i].toUpperCase());
+            }
+        }
+    }
+    
     private void getParameterEnd(HttpServletRequest req) {
         String end = req.getParameter(PARA_NAME_END);
         try {
