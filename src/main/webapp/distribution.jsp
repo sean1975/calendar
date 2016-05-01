@@ -5,6 +5,7 @@
 <%@ page import="com.google.appengine.api.users.UserServiceFactory"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -54,6 +55,17 @@
         chart.draw(data, options);
     }
 </script>
+<%-- sort statistics table by jQuery plugin tablesorter http://tablesorter.com/docs/ --%>
+<link type="text/css" rel="stylesheet" href="/stylesheets/style.css" />
+<script src="scripts/jquery.tablesorter.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+	    $("#datatable").tablesorter({
+	    	widgets: ["zebra"],
+	        sortList: [[${fn:length(intervals) + 1}, 1]]
+	    });
+	}); 
+</script>
 </head>
 
 <body>
@@ -63,7 +75,8 @@
 	<div class="main">
         <div class="chart" id="columnchart"></div>
         <div class="statistics">
-		<table>
+		<table id="datatable" class="tablesorter">
+		    <thead>
 			<tr>
 				<th>Summary</th>
 				<c:forEach items="${intervals}" var="startDate" varStatus="status">
@@ -71,11 +84,11 @@
 				</c:forEach>
 				<th>Total</th>
 			</tr>
-            <c:set var="col" value="0" />
+			</thead>
+			<tbody>
                 <c:forEach items="${distributionMap}" var="entry">
 			        <c:set var="subtotal" value="0" />
-                    <c:set var="col" value="${col + 1}" />
-            <tr class="odd_row_<c:out value="${col % 2}" />">
+            <tr>
                 <td><c:out value="${entry.key}" /></td>
                     <c:forEach items="${entry.value }" var="occurrences">
                 <td><c:out value="${occurrences}" /></td>
@@ -84,6 +97,7 @@
                 <td><c:out value="${subtotal}" /></td>
             </tr>
                 </c:forEach>
+            </tbody>    
 		</table>
 		</div>
 	</div>
