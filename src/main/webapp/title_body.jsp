@@ -1,5 +1,7 @@
 <c:set var="calendarSummary"
 	value="${requestScope['calendar'].summary}" />
+<c:set var="calendarId"
+	value="${requestScope['calendar'].id}" />
 <c:set var="calendarTimeZone"
 	value="${requestScope['calendar'].timeZone}" />
 <fmt:formatDate var="startDate" pattern="yyyy-MM-dd" timeZone="${calendarTimeZone}"
@@ -8,9 +10,10 @@
     value="${requestScope['calendar'].end}" />
 
 <div class="title">
-	<span>Calendar: <c:out value="${calendarSummary}" /></span> <a href="/logout">(sign out)</a><br>
-	<span>Time Zone: <c:out value="${calendarTimeZone}" /></span>
     <form id="dateform" class="dateform" action="analytics">
+	    <span>Calendar: <c:out value="${calendarSummary}" /></span> <a href="/logout">(sign out)</a><br>
+	    <input type="hidden" name="cid" value="${calendarId}">
+	    <span>Time Zone: <c:out value="${calendarTimeZone}" /></span><br>
         <c:forEach items="${requestScope['distribution'].eventList}" var="event" varStatus="eventListStatus">
             <c:choose>
                 <c:when test="${eventListStatus.first}">

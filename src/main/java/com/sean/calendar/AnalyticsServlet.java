@@ -34,9 +34,10 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
     private static final long serialVersionUID = 1L;
     private static final String SERVER_PATH_LOGOUT = "/logout";
     private static final String APPLICATION_NAME = "Sean's Calendar Analytics";
-    private static final String CALENDAR_NAME = "primary";
+    private static final String CALENDAR_NAME_DEFAULT = "primary";
     private static final String RESULT_PAGE = "/analytics.jsp";
     private static final String DISTRIBUTION_PAGE = "/distribution.jsp";
+    private static final String PARA_NAME_CID = "cid";
     private static final String PARA_NAME_SUMMARY = "summary";
     private static final String PARA_NAME_START = "start";
     private static final String PARA_NAME_END = "end";
@@ -49,7 +50,9 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
     private Date startDate;
     private Date endDate;
     private Set<String> excludeSet;
-
+    private Calendar calendarService;
+    private String calendarId;
+    
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String serverPath = req.getRequestURI();
@@ -67,9 +70,10 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
         getServletContext().log("Credential for user [" + AuthUtils.getUserId(req) + "] is expiring in "
                 + credential.getExpiresInSeconds() + " seconds");
 
-        Calendar service = new Calendar.Builder(Utils.getDefaultTransport(), Utils.getDefaultJsonFactory(), credential)
+        calendarService = new Calendar.Builder(Utils.getDefaultTransport(), Utils.getDefaultJsonFactory(), credential)
                 .setApplicationName(APPLICATION_NAME).build();
-        com.google.api.services.calendar.model.Calendar calendar = service.calendars().get(CALENDAR_NAME).execute();
+        getParameterCID(req);
+        com.google.api.services.calendar.model.Calendar calendar = calendarService.calendars().get(calendarId).execute();
         timeZone = TimeZone.getTimeZone(calendar.getTimeZone());
         
         // Get parameters from HTTP request
@@ -79,19 +83,18 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
         getParameterExclude(req);
 
         // Set attribute calendar
-        com.sean.calendar.Calendar calendarObject = new com.sean.calendar.Calendar(calendar.getSummary(),
-                calendar.getTimeZone(), startDate, endDate);
+        com.sean.calendar.Calendar calendarObject = new com.sean.calendar.Calendar(calendar, startDate, endDate);
         req.setAttribute(ATTR_NAME_CALENDAR, calendarObject);
         
         if (summarySet != null && (summarySet.size() > 0)) {
-            Distribution distribution = getDistribution(service);
+            Distribution distribution = getDistribution();
             req.setAttribute(ATTR_NAME_DISTRIBUTION, distribution);
 
             // Forward to the result page for displaying distribution list
             RequestDispatcher rd = req.getRequestDispatcher(DISTRIBUTION_PAGE);
             rd.forward(req, resp);
         } else {            
-            ArrayList<com.sean.calendar.Event> eventList = getEventList(service);
+            ArrayList<com.sean.calendar.Event> eventList = getEventList();
             req.setAttribute(ATTR_NAME_EVENTS, eventList);
 
             // Forward to the result page for displaying event list
@@ -100,13 +103,13 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
         }
     }
 
-    private Integer getEventMap(Calendar service, Map<String, List<Event>> eventMap, Set<String> summarySet)
+    private Integer getEventMap(Map<String, List<Event>> eventMap, Set<String> summarySet)
             throws IOException {
         // Iterate over the events in the specified calendar
         Integer totalOccurrence = 0;
         String pageToken = null;
         do {
-            com.google.api.services.calendar.Calendar.Events.List eventsList = service.events().list(CALENDAR_NAME);
+            com.google.api.services.calendar.Calendar.Events.List eventsList = calendarService.events().list(calendarId);
             eventsList.setSingleEvents(true).setOrderBy("startTime").setPageToken(pageToken);
             eventsList.setTimeMin(new DateTime(startDate, timeZone));
             eventsList.setTimeMax(new DateTime(endDate, timeZone));
@@ -155,9 +158,9 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
         
     }
     
-    private Distribution getDistribution(Calendar service) throws IOException {
+    private Distribution getDistribution() throws IOException {
         Map<String, List<Event>> eventMap = new HashMap<String, List<Event>>();
-        getEventMap(service, eventMap, summarySet);
+        getEventMap(eventMap, summarySet);
         // Put empty event list if the specific event is not found from startDate to endDate
         for (String summary : summarySet) {
             if (! eventMap.containsKey(summary)) {
@@ -207,10 +210,10 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
         return distribution;
     }
 
-    private ArrayList<com.sean.calendar.Event> getEventList(Calendar service)
+    private ArrayList<com.sean.calendar.Event> getEventList()
             throws IOException {
         Map<String, List<Event>> eventMap = new HashMap<String, List<Event>>();
-        Integer totalOccurrence = getEventMap(service, eventMap, null);
+        Integer totalOccurrence = getEventMap(eventMap, null);
 
         // Sort events by occurrences
         ArrayList<com.sean.calendar.Event> eventList = new ArrayList<com.sean.calendar.Event>();
@@ -310,6 +313,13 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
             }
         }
     }
+
+    private void getParameterCID(HttpServletRequest req) {
+        calendarId = req.getParameter(PARA_NAME_CID);
+        if (calendarId == null || calendarId.length() == 0) {
+            calendarId = CALENDAR_NAME_DEFAULT;
+        }
+   }
 
     @Override
     protected String getRedirectUri(HttpServletRequest req) throws ServletException, IOException {

@@ -66,7 +66,7 @@
 			    </c:choose>
 				<c:set var="odd_row" value="${status.count % 2}" />
 			    <tr class="odd_row_${odd_row}">
-				    <td class="index"><a href="analytics?start=${startDate}&end=${endDate}&summary=${summary}"><c:out value="${status.count}." /></a></td>
+				    <td class="index"><a href="analytics?cid=${calendarId}&start=${startDate}&end=${endDate}&summary=${summary}"><c:out value="${status.count}." /></a></td>
 					<td class="text"><c:out value="${event.summary}" /></td>
 					<td class="number"><c:out value="${event.occurrence}" /></td>
 					<td class="number"><fmt:formatNumber value="${event.occurrencePercentage}" type="percent" maxFractionDigits="1" minFractionDigits="1" /></td>

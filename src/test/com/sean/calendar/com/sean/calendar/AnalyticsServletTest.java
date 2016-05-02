@@ -29,9 +29,11 @@ public class AnalyticsServletTest {
     protected static final String PARA_NAME_START = "start"; // AnalyticsServlet.PARA_NAME_START
     protected static final String PARA_NAME_END = "end"; // AnalyticsServlet.PARA_NAME_END
     protected static final String PARA_NAME_EXCLUDE = "exclude"; // AnalyticsServlet.PARA_NAME_EXCLUDE
+    protected static final String PARA_NAME_CID = "cid"; // AnalyticsServlet.PARA_NAME_CID
     protected Method getParameterStart; // AnalyticsServlet.getParameterStart()
     protected Method getParameterEnd; // AnalyticsServlet.getParameterEnd()
     protected Method getParameterExclude; // AnalyticsServlet.getParameterExclude()
+    protected Method getParameterCID; // AnalyticsServlet.getParameterCID()
     
     @SuppressWarnings("rawtypes")
     @Before
@@ -58,6 +60,9 @@ public class AnalyticsServletTest {
             // AnalyticsServlet.getParameterExclude()
             getParameterExclude = servlet.getClass().getDeclaredMethod("getParameterExclude", cArg);
             getParameterExclude.setAccessible(true);
+            // AnalyticsServlet.getParameterCID()
+            getParameterCID = servlet.getClass().getDeclaredMethod("getParameterCID", cArg);
+            getParameterCID.setAccessible(true);
         } catch (Exception e) {
             e.printStackTrace();
             fail("Failed to set up test: " + e.toString());
@@ -136,4 +141,20 @@ public class AnalyticsServletTest {
         assertFalse(excludeSet.contains("close"));
     }
 
+    @Test
+    public void testGetParameterCID() {
+        String cid = "fm9qs8tn9kgh2sdc2vt5l3qbqg%40group.calendar.google.com";
+        HttpServletRequest req = mock(HttpServletRequest.class);
+        when(req.getParameter(PARA_NAME_CID)).thenReturn(cid);
+        try {
+            getParameterCID.invoke(servlet,  req);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.toString());
+        }
+        verify(req).getParameter(PARA_NAME_CID);
+        String calendarId = (String) getField("calendarId");
+        assertNotNull(calendarId);
+        assertTrue(cid.compareTo(calendarId) == 0);
+    }
 }

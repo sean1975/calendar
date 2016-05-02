@@ -4,19 +4,25 @@ import java.util.Date;
 
 public class Calendar {
     private String summary;
+    private String id;
     private String timeZone;
     private Date start;
     private Date end;
     
-    public Calendar(String summary, String timeZone, Date start, Date end) {
-        this.summary = summary;
-        this.timeZone = timeZone;
+    public Calendar(com.google.api.services.calendar.model.Calendar calendar, Date start, Date end) {
+        this.summary = calendar.getSummary();
+        this.id = calendar.getId();
+        this.timeZone = calendar.getTimeZone();
         this.start = start;
         this.end = end;
     }
 
     public String getSummary() {
         return this.summary;
+    }
+    
+    public String getId() {
+        return this.id;
     }
     
     public String getTimeZone() {
