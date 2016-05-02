@@ -2,15 +2,15 @@
 <web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
- <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>analytics</web-resource-name>
-      <url-pattern>/analytics</url-pattern>
-    </web-resource-collection>
-    <auth-constraint>
-      <role-name>*</role-name>
-    </auth-constraint>
-  </security-constraint>
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>analytics</web-resource-name>
+            <url-pattern>/analytics</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>*</role-name>
+        </auth-constraint>
+    </security-constraint>
   	<servlet>
 		<servlet-name>analytics_servlet</servlet-name>
 		<servlet-class>com.sean.calendar.AnalyticsServlet</servlet-class>
@@ -22,6 +22,7 @@
 	<servlet-mapping>
 		<servlet-name>analytics_servlet</servlet-name>
 		<url-pattern>/analytics</url-pattern>
+		<url-pattern>/logout</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>analytics_servletcallback</servlet-name>

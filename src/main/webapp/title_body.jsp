@@ -8,7 +8,7 @@
     value="${requestScope['calendar'].end}" />
 
 <div class="title">
-	<span>Calendar: <c:out value="${calendarSummary}" /></span> <br>
+	<span>Calendar: <c:out value="${calendarSummary}" /></span> <a href="/logout">(sign out)</a><br>
 	<span>Time Zone: <c:out value="${calendarTimeZone}" /></span>
     <form id="dateform" class="dateform" action="analytics">
         <c:forEach items="${requestScope['distribution'].eventList}" var="event" varStatus="eventListStatus">

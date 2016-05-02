@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 
 public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet {
     private static final long serialVersionUID = 1L;
+    private static final String SERVER_PATH_LOGOUT = "/logout";
     private static final String APPLICATION_NAME = "Sean's Calendar Analytics";
     private static final String CALENDAR_NAME = "primary";
     private static final String RESULT_PAGE = "/analytics.jsp";
@@ -51,8 +52,13 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
 
     @Override
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        getServletContext().log("Handling request: " + req.getRequestURL());
-
+        String serverPath = req.getRequestURI();
+        getServletContext().log("Server path: " + serverPath);
+        if (serverPath != null && serverPath.compareToIgnoreCase(SERVER_PATH_LOGOUT) == 0) {
+            getServletContext().log("Logout user [" + AuthUtils.getUserId(req) + "]");
+            resp.sendRedirect(AuthUtils.getLogoutUri(req));
+        }
+        
         Credential credential = this.getCredential();
         if (credential == null) {
             getServletContext().log("No credential");

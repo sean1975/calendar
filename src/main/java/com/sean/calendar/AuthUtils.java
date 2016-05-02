@@ -23,6 +23,7 @@ public class AuthUtils {
     public static final String CLIENT_SECRETS_PATH = "/WEB-INF/client_secrets.json";
     public static final String CLIENT_SECRETS_ENCODING = "UTF-8";
     private static final String CALLBACK_URL = "/oauth2callback";
+    private static final String AFTER_LOGOUT_URL = "/analytics";
     private static final List<String> SCOPES = Arrays.asList(CalendarScopes.CALENDAR_READONLY);
 
     private static DataStoreFactory DATA_STORE_FACTORY;
@@ -53,6 +54,10 @@ public class AuthUtils {
         return instance;
     }
 
+    protected static String getLogoutUri(HttpServletRequest req) {
+        return UserServiceFactory.getUserService().createLogoutURL(AFTER_LOGOUT_URL);
+    }
+    
     protected static String getRedirectUri(HttpServletRequest req) throws ServletException, IOException {
         GenericUrl url = new GenericUrl(req.getRequestURL().toString());
         url.setRawPath(CALLBACK_URL);
