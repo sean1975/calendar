@@ -1,6 +1,7 @@
 package com.sean.calendar;
 
 import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
@@ -31,10 +32,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet {
+    private static final String ATTR_NAME_CALENDARLIST = "calendarList";
+    private static final String ATTR_NAME_ID = "id";
+    private static final String ATTR_NAME_USERNAME = "username";
     private static final long serialVersionUID = 1L;
+    private static final String SERVER_PATH_INDEX = "/index";
     private static final String SERVER_PATH_LOGOUT = "/logout";
     private static final String APPLICATION_NAME = "Sean's Calendar Analytics";
     private static final String CALENDAR_NAME_DEFAULT = "primary";
+    private static final String INDEX_PAGE = "/index.jsp";
     private static final String RESULT_PAGE = "/analytics.jsp";
     private static final String DISTRIBUTION_PAGE = "/distribution.jsp";
     private static final String PARA_NAME_CID = "cid";
@@ -57,9 +63,14 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String serverPath = req.getRequestURI();
         getServletContext().log("Server path: " + serverPath);
-        if (serverPath != null && serverPath.compareToIgnoreCase(SERVER_PATH_LOGOUT) == 0) {
-            getServletContext().log("Logout user [" + AuthUtils.getUserId(req) + "]");
-            resp.sendRedirect(AuthUtils.getLogoutUri(req));
+        if (serverPath == null) {
+            serverPath = SERVER_PATH_INDEX;
+        }
+        
+        if (serverPath.compareToIgnoreCase(SERVER_PATH_LOGOUT) == 0) {
+            getServletContext().log("Logout user [" + AuthUtils.getUserId() + "]");
+            resp.sendRedirect(AuthUtils.getLogoutUri());
+            return;
         }
         
         Credential credential = this.getCredential();
@@ -67,11 +78,18 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
             getServletContext().log("No credential");
             resp.sendRedirect(this.getRedirectUri(req));
         }
-        getServletContext().log("Credential for user [" + AuthUtils.getUserId(req) + "] is expiring in "
+        
+        getServletContext().log("Credential for user [" + AuthUtils.getUserId() + "] is expiring in "
                 + credential.getExpiresInSeconds() + " seconds");
-
+        
         calendarService = new Calendar.Builder(Utils.getDefaultTransport(), Utils.getDefaultJsonFactory(), credential)
                 .setApplicationName(APPLICATION_NAME).build();
+
+        if (serverPath.compareToIgnoreCase(SERVER_PATH_INDEX) == 0) {
+            doIndex(req, resp);
+            return;
+        }
+        
         getParameterCID(req);
         com.google.api.services.calendar.model.Calendar calendar = calendarService.calendars().get(calendarId).execute();
         timeZone = TimeZone.getTimeZone(calendar.getTimeZone());
@@ -101,6 +119,38 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
             RequestDispatcher rd = req.getRequestDispatcher(RESULT_PAGE);
             rd.forward(req, resp);
         }
+    }
+
+    private void doIndex(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String userName = AuthUtils.getUserName();
+        String userId = AuthUtils.getUserId();
+        req.setAttribute(ATTR_NAME_USERNAME, userName);
+        req.setAttribute(ATTR_NAME_ID, userId);
+        // Iterate through entries in calendar list
+        List<com.sean.calendar.Calendar> calendars = new ArrayList<com.sean.calendar.Calendar>();
+        String pageToken = null;
+        do {
+            com.google.api.services.calendar.model.CalendarList calendarList = calendarService.calendarList().list().setPageToken(pageToken).execute();
+            List<CalendarListEntry> items = calendarList.getItems();
+
+            for (CalendarListEntry listEntry : items) {
+                com.sean.calendar.Calendar calendar = null;
+                if (listEntry.isPrimary()) {
+                    calendar = new com.sean.calendar.Calendar(CALENDAR_NAME_DEFAULT, listEntry.getId(),
+                            listEntry.getTimeZone());
+                } else {
+                    calendar = new com.sean.calendar.Calendar(listEntry.getSummary(), listEntry.getId(),
+                            listEntry.getTimeZone());
+                }
+                calendars.add(calendar);
+            }
+            pageToken = calendarList.getNextPageToken();
+        } while (pageToken != null);
+        req.setAttribute(ATTR_NAME_CALENDARLIST, calendars);
+        
+        // Forward to the index page for selecting calendars
+        RequestDispatcher rd = req.getRequestDispatcher(INDEX_PAGE);
+        rd.forward(req, resp);
     }
 
     private Integer getEventMap(Map<String, List<Event>> eventMap, Set<String> summarySet)

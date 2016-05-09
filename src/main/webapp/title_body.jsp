@@ -10,10 +10,20 @@
     value="${requestScope['calendar'].end}" />
 
 <div class="title">
+	<div class="calendarsummary">
+	    <div class="calendarlabel">Calendar: </div>
+	    <div class="calendardropdown">
+	        <%-- Use input tag to make the look-and-feel aligned but use readonly attribute to disable its functionalities --%>
+	        <input id="calendarbutton" onclick="dropdownMenu()" value="${calendarSummary}" readonly>
+	        <div id="dropdownoptions" class="dropdownoptions">
+	            <div class="dropdownoption"><a href="/index">Change calendar</a></div>
+	            <div class="dropdownoption"><a href="/logout">Sign out</a></div>
+	        </div>
+	    </div>
+	</div>
     <form id="dateform" class="dateform" action="analytics">
-	    <span>Calendar: <c:out value="${calendarSummary}" /></span> <a href="/logout">(sign out)</a><br>
 	    <input type="hidden" name="cid" value="${calendarId}">
-	    <span>Time Zone: <c:out value="${calendarTimeZone}" /></span><br>
+	    <div><span>Time Zone: <c:out value="${calendarTimeZone}" /></span></div>
         <c:forEach items="${requestScope['distribution'].eventList}" var="event" varStatus="eventListStatus">
             <c:choose>
                 <c:when test="${eventListStatus.first}">

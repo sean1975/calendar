@@ -6,6 +6,7 @@
         <web-resource-collection>
             <web-resource-name>analytics</web-resource-name>
             <url-pattern>/analytics</url-pattern>
+            <url-pattern>/index</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <role-name>*</role-name>
@@ -23,12 +24,13 @@
 		<servlet-name>analytics_servlet</servlet-name>
 		<url-pattern>/analytics</url-pattern>
 		<url-pattern>/logout</url-pattern>
+		<url-pattern>/index</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>analytics_servletcallback</servlet-name>
 		<url-pattern>/oauth2callback</url-pattern>
 	</servlet-mapping>
 	<welcome-file-list>
-		<welcome-file>index.jsp</welcome-file>
+		<welcome-file>index</welcome-file>
 	</welcome-file-list>
 </web-app>

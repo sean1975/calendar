@@ -17,6 +17,14 @@ public class Calendar {
         this.end = end;
     }
 
+    public Calendar(String summary, String id, String timeZone) {
+        this.summary = summary;
+        this.id = id;
+        this.timeZone = timeZone;
+        this.start = null;
+        this.end = null;
+    }
+    
     public String getSummary() {
         return this.summary;
     }

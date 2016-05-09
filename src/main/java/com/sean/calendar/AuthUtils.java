@@ -54,7 +54,7 @@ public class AuthUtils {
         return instance;
     }
 
-    protected static String getLogoutUri(HttpServletRequest req) {
+    protected static String getLogoutUri() {
         return UserServiceFactory.getUserService().createLogoutURL(AFTER_LOGOUT_URL);
     }
     
@@ -64,8 +64,12 @@ public class AuthUtils {
         return url.build();
     }
 
-    protected static String getUserId(HttpServletRequest req) throws ServletException, IOException {
+    protected static String getUserId() throws ServletException, IOException {
         return UserServiceFactory.getUserService().getCurrentUser().getUserId();
+    }
+
+    protected static String getUserName() throws ServletException, IOException {
+        return UserServiceFactory.getUserService().getCurrentUser().getNickname();
     }
 
     protected AuthorizationCodeFlow initializeFlow(Reader clientSecretsStream) throws IOException {        

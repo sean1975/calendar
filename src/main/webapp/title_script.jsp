@@ -17,3 +17,22 @@
         document.getElementById("dateform").submit();
     }
 </script>
+<%-- function for dorpdown mean to change calendar or sign out --%>
+<script type="text/javascript">
+    function dropdownMenu() {
+    	document.getElementById("dropdownoptions").classList.toggle("show");
+    }
+    // Close the dropdown menu if the user clicks outside of it
+    window.onclick = function(event) {
+        if (!event.target.matches('#calendarbutton')) {
+            var dropdowns = document.getElementsByClassName("dropdownoptions");
+            var i;
+            for (i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+ </script>
