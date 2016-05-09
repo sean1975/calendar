@@ -32,9 +32,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet {
-    private static final String ATTR_NAME_CALENDARLIST = "calendarList";
-    private static final String ATTR_NAME_ID = "id";
-    private static final String ATTR_NAME_USERNAME = "username";
     private static final long serialVersionUID = 1L;
     private static final String SERVER_PATH_INDEX = "/index";
     private static final String SERVER_PATH_LOGOUT = "/logout";
@@ -51,6 +48,10 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
     private static final String ATTR_NAME_DISTRIBUTION = "distribution";
     private static final String ATTR_NAME_EVENTS = "events";
     private static final String ATTR_NAME_CALENDAR = "calendar";
+    private static final String ATTR_NAME_CALENDARLIST = "calendarList";
+    private static final String ATTR_NAME_ID = "id";
+    private static final String ATTR_NAME_USERNAME = "username";
+    private static final String ATTR_NAME_ERROR = "error";
     private Set<String> summarySet;
     private TimeZone timeZone;
     private Date startDate;
@@ -91,7 +92,15 @@ public class AnalyticsServlet extends AbstractAppEngineAuthorizationCodeServlet 
         }
         
         getParameterCID(req);
-        com.google.api.services.calendar.model.Calendar calendar = calendarService.calendars().get(calendarId).execute();
+        com.google.api.services.calendar.model.Calendar calendar = null;
+        try {
+            calendar = calendarService.calendars().get(calendarId).execute();
+        } catch (IOException e) {
+            req.setAttribute(ATTR_NAME_ERROR, calendarId + " is not a valid calendar ID");
+            calendarId = CALENDAR_NAME_DEFAULT;
+            doIndex(req, resp);
+            return;
+        }
         timeZone = TimeZone.getTimeZone(calendar.getTimeZone());
         
         // Get parameters from HTTP request

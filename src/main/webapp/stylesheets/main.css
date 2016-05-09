@@ -105,3 +105,8 @@ th.date, td.date {
     max-width: 150px;
     text-align: right;
 }
+
+.err_msg {
+    display: inline;
+    color: red;
+}
