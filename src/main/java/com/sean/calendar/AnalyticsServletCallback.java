@@ -23,7 +23,7 @@ public class AnalyticsServletCallback extends AbstractAuthorizationCodeCallbackS
 
     @Override
     protected String getUserId(HttpServletRequest req) throws ServletException, IOException {
-        return AuthUtils.getUserId(req);
+        return AuthUtils.getUserId();
     }
 
     @Override
